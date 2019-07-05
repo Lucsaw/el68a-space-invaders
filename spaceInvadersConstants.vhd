@@ -10,7 +10,7 @@ package spaceInvadersConstants is
     constant SCREEN_WIDTH           : integer := 16;
     constant HEIGHT                 : integer := 12;
 
-    type position is array(1 downto 0) of integer range SCREEN_WIDTH-1 downto 0;
+    type position is array(1 downto 0) of integer range SCREEN_WIDTH-1 downto 0;    --position(1) = X position(0) = Y
     type enemyPositions is array(N_ENEMIES-1 downto 0) of position;
     type playerPositions is array(N_PLAYERS-1 downto 0) of position;
     type enemyProjectilePositions is array(N_ENEMY_PROJECTILES-1 downto 0) of position;
