@@ -8,8 +8,6 @@ ENTITY VGA IS
 PORT(
 CLOCK_50, RESET: IN STD_LOGIC;
 VGA_HS,VGA_VS:OUT STD_LOGIC;
-SW: STD_LOGIC_VECTOR(1 downto 0);
-KEY: STD_LOGIC_VECTOR(3 DOWNTO 0);
 VGA_R,VGA_B,VGA_G: OUT STD_LOGIC_VECTOR(3 downto 0);
 enemies: IN enemyPositions;
 enemiesRunning: IN STD_LOGIC_VECTOR(N_ENEMIES - 1 downto 0);
@@ -41,14 +39,6 @@ ARCHITECTURE MAIN OF VGA IS
 		player2Projectile: IN position
 	);
 	END COMPONENT SYNC;
-
-	COMPONENT single_pulse_debounce IS 
-	PORT (
-        key_in : IN std_logic;
-        clk : IN std_logic;
-        pulse_out : OUT std_logic;
-        key_out: OUT std_logic);
-	END COMPONENT single_pulse_debounce;
 
     COMPONENT pll is
         PORT (
