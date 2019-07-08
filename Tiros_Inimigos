@@ -1,0 +1,86 @@
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+use ieee.math_real.uniform;
+use ieee.math_real.floor;
+library work;
+use work.spaceInvadersConstants.all;
+
+ENTITY TIROS_INIMIGOS is
+	PORT (
+		start:				in std_logic;
+		LEVEL: 				in integer;
+		num_aleatorio:  	in integer range 0 to 16;
+		clk, reset:		 	in std_logic;
+		positions_Inimigos: in enemyPositions; 
+		enemyProjectile:  out enemyProjectilePositions);		
+END TIROS_INIMIGOS;
+
+ARCHITECTURE TIROS_INIMIGOS of TIROS_INIMIGOS is  
+	SIGNAL positionsTiros : enemyProjectilePositions;
+
+BEGIN
+    PROCESS(clk)
+    variable TIROS_TELA : integer range 0 to 4;
+	 variable count_time : integer range 0 to 10;
+	 variable limit : integer range 0 to 1; -- limita em 1 tiro por clock
+	 variable time_shot: integer range 0 to  11; -- inicia com 10% de chance de atirar 
+	 variable X : integer range 0 to  SCREEN_WIDTH;
+	 variable Y : integer range 0 to HEIGHT;
+	 variable num_aleatorio : integer range 0 to SCREEN_WIDTH+1;
+	 variable aux_position : position;
+
+    BEGIN
+		IF(rising_edge(clk)) THEN	-- quando o jogo esta ativo			
+			IF(start='1' and reset='0') THEN
+			
+				limit:=0; -- limitar em um tiro inimigo por vez
+				count_time:=count_time+1; -- contador para criar um novo tiro
+				time_shot:=11-LEVEL; -- tempo entre tiros/chance de atirar, quanto menor mais doficil
+				-- pseudo aletório para gerar uma coluna para o tiro
+				num_aleatorio:= num_aleatorio+1;
+				IF(num_aleatorio>SCREEN_WIDTH)then
+					num_aleatorio:=0;
+				END IF;
+				
+				------TIRO AVANÇA DE POSIÇÃO--------------------
+				FOR i IN N_ENEMY_PROJECTILES-1 downto 0 LOOP
+					IF(positionsTiros(i)(0)>0) THEN -- para nao avançar tiros inativos
+							positionsTiros(i)(0) <= positionsTiros(i)(0)+1;
+							IF(positionsTiros(i)(0)>HEIGHT) then -- posicao Y
+								positionsTiros(i)(0)<= 0; -- posicao inativa
+							END IF;
+					END IF;
+				END LOOP;---------------------------------------
+				
+				-------CRIA NOVO TIRO---------------------------
+				IF(count_time>=time_shot) THEN
+					count_time:=0;
+					FOR i IN N_ENEMY_PROJECTILES-1 downto 0 LOOP
+						IF(positionsTiros(i)(0)=0 and limit=0) THEN -- ACHA POSIÇÕES VAZIAS NO VETOR TIROS_INIGOS
+							limit:=1;
+							X := 0;
+							Y := 0;
+						--verifica se há inimigos nessa coluna
+							FOR A IN N_ENEMIES-1 downto 0 LOOP -- percorre vetor de inimigos
+								IF(positions_Inimigos(A)(1)=num_aleatorio) THEN -- vai setar no ultimo inimigo da coluna
+									X := positions_Inimigos(A)(1);
+									Y := positions_Inimigos(A)(0);
+								END IF;
+							END LOOP;						
+							positionsTiros(i)(1) <= X;
+							positionsTiros(i)(0) <= Y+1;		
+						END IF;				
+					END LOOP;
+				END IF;--------------------------------------
+				
+			ELSE
+				 positionsTiros <= (others=>(others=>0)); -- jogo inativo
+			END IF;
+			
+		END IF;
+		
+		EnemyProjectile <= positionsTiros;
+		
+	END PROCESS;
+END ARCHITECTURE TIROS_INIMIGOS;
